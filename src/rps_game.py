@@ -22,11 +22,15 @@ class Hand:
         else:
             return f"{opponent} wins against {self.name}."
 
-if __name__ == "__main__":
+def parse_arguments():
     parser = argparse.ArgumentParser(description="Play a game of Rock, Paper, Scissors.")
     parser.add_argument("--hand", type=str, choices=["paper", "scissors", "rock"], help="Your hand ('paper', 'scissors', or 'rock')")
+    return parser.parse_args()
+    pass
 
-    args = parser.parse_args()
+if __name__ == "__main__":
+        
+    args = parse_arguments()
 
     # Choose a random hand for the script
     script_hand = Hand(random.choice(["paper", "scissors", "rock"]))

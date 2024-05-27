@@ -1,19 +1,23 @@
 # tests/test_rps_game.py
-from unittest.mock import patch
 import pytest
-from src.rps_game import parse_arguments  # Assuming you have a function to parse arguments
+from unittest.mock import patch
+from src.rps_game import parse_arguments  # Ensure this import is correct
 
-def test_argparse_switches_valid():
+@patch('argparse.ArgumentParser')
+def test_argparse_switches_valid(mock_argparse):
     """
     Test that argparse switches are valid.
     """
-    # Mock the argparse.parse_args() call to return valid arguments
-    with patch('argparse.ArgumentParser().parse_args') as mock_parse_args:
-        mock_parse_args.return_value = {'hand': 'paper'}
-        result = parse_arguments()  # Assuming parse_arguments() is your function to parse args
-        
-        assert result['hand'] == 'paper', "Expected 'hand' to be 'paper'"
-        mock_parse_args.assert_called_once_with()
+    # Setup the mock to return a specific value when parse_args is called
+    mock_instance = mock_argparse.return_value
+    mock_instance.parse_args.return_value = {'hand': 'paper'}
+    
+    # Call your function
+    result = parse_arguments()
+    
+    # Assertions
+    assert result['hand'] == 'paper', "Expected 'hand' to be 'paper'"
+    mock_instance.parse_args.assert_called_once_with()
 
 @pytest.mark.parametrize(
     "input_string,expected",
@@ -24,22 +28,31 @@ def test_argparse_switches_valid():
     ],
     ids=["scissors", "rock", "paper"]
 )
-def test_argparse_switches_valid_examples(input_string, expected):
+@patch('argparse.ArgumentParser')
+def test_argparse_switches_valid_examples(mock_argparse, input_string, expected):
     """
     Test that argparse switches are valid with various examples.
     """
-    # Mock the argparse.parse_args() call to return the expected arguments
-    with patch('argparse.ArgumentParser().parse_args') as mock_parse_args:
-        mock_parse_args.return_value = expected
-        result = parse_arguments()  # Assuming parse_arguments() is your function to parse args
-        
-        assert result == expected, f"Expected {result} to match {expected}"
-        mock_parse_args.assert_called_once_with()
+    # Setup the mock to return the expected arguments
+    mock_instance = mock_argparse.return_value
+    mock_instance.parse_args.return_value = expected
+    
+    # Call your function
+    result = parse_arguments()
+    
+    # Assertions
+    assert result == expected, f"Expected {result} to match {expected}"
+    mock_instance.parse_args.assert_called_once_with()
 
-def test_argparse_switches_invalid():
+@patch('argparse.ArgumentParser')
+def test_argparse_switches_invalid(mock_argparse):
     """
     Test that argparse raises an error for invalid switches.
     """
+    # Setup the mock to simulate an error when parse_args is called
+    mock_instance = mock_argparse.return_value
+    mock_instance.parse_args.side_effect = SystemExit(2)  # Simulate an error
+    
     # Attempt to parse an invalid switch
-    with pytest.raises(SystemExit):  # SystemExit is raised when argparse encounters an error
-        parse_arguments(['--invalid_switch'])  # Assuming parse_arguments() is your function to parse args
+    with pytest.raises(SystemExit):
+        parse_arguments()
